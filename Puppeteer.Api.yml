@@ -1,0 +1,36 @@
+# ASP.NET Core (.NET Framework)
+# Build and test ASP.NET Core projects targeting the full .NET Framework.
+# Add steps that publish symbols, save build artifacts, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/languages/dotnet-core
+pool: DKPool
+
+variables:
+  buildPlatform: 'AnyCPU'
+
+steps:
+  - task: NuGetToolInstaller@0
+  - task: NodeTool@0
+    inputs:
+      versionSpec: 10.3.0
+      
+  - task: CopyFiles@2
+    displayName: 'Copy Puppeteer.Api to artifacts staging directory'
+    inputs:
+      sourceFolder: 'Puppeteer.Api'
+      contents: |
+          **/*
+          !node_modules/**/*
+          !package-lock.json
+      targetFolder: $(Build.ArtifactStagingDirectory)/$(Build.BuildId)/Puppeteer.Api
+
+  - task: ArchiveFiles@2
+    inputs:
+      rootFolderOrFile: '$(Build.ArtifactStagingDirectory)/$(Build.BuildId)'
+      includeRootFolder: false
+      archiveType: 'zip'
+      archiveFile: '$(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip'
+      replaceExistingArchive: true
+
+  - task: PublishBuildArtifacts@1
+    inputs:
+      pathtoPublish: '$(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip'
