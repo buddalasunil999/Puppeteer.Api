@@ -2,8 +2,11 @@
 var express = require("express");
 const puppeteer = require("puppeteer");
 var port = 5006;
-var browser = await puppeteer.launch({ args: ["--no-sandbox"] });
-var page = await browser.newPage();
+var browser, page;
+(async () => {
+browser = await puppeteer.launch({ args: ["--no-sandbox"] });
+page = await browser.newPage();
+})();
 var chain = Promise.resolve();
 
 var app = express();
