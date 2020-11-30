@@ -7,7 +7,6 @@ var browser, page;
 browser = await puppeteer.launch({ args: ["--no-sandbox"] });
 page = await browser.newPage();
 })();
-var chain = Promise.resolve();
 
 var app = express();
 
@@ -16,13 +15,11 @@ app.get("/", function (req, res) {
 });
 
 app.get("/pdf", async function (req, res) {
-chain = chain.then(async () => { 
   try {
     const pageResponse = await page.goto(req.query.url, {
       waitUntil: "networkidle2",
     });
     if (pageResponse.ok()) {
-      
          await page.goto(req.query.url);
          await page.emulateMediaType("print");
          const pdf = await page.pdf({
@@ -30,7 +27,6 @@ chain = chain.then(async () => {
          });
          res.writeHead(200, { "Content-Type": "application/pdf" });
          res.send(pdf);
-     
     } else {
       res
         .status(500)
@@ -41,7 +37,6 @@ chain = chain.then(async () => {
     console.log(e);
     console.log("leaving catch block");
   }
-});
 });
 
 app.listen(port, function () {
