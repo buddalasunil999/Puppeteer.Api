@@ -2,7 +2,6 @@
 var express = require("express");
 const puppeteer = require("puppeteer");
 var port = 5006;
-var browser;
 var app = express();
 
 app.get("/", function (req, res) {
@@ -10,12 +9,10 @@ app.get("/", function (req, res) {
 });
 
 app.get("/pdf", async function (req, res) {
-let page;
+let browser;
   try {
-if(!browser){
-browser = await puppeteer.launch({ args: ["--no-sandbox"] });
-}
-    page = await browser.newPage();
+    browser = await puppeteer.launch({ args: ["--no-sandbox"] });
+    const page = await browser.newPage();
     const pageResponse = await page.goto(req.query.url, {
       waitUntil: "networkidle2",
     });
@@ -38,7 +35,7 @@ browser = await puppeteer.launch({ args: ["--no-sandbox"] });
     console.log("leaving catch block");
   }
 finally {
-await page.close();
+await browser.close();
 }
 });
 
