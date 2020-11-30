@@ -2,8 +2,9 @@
 var express = require("express");
 const puppeteer = require("puppeteer");
 var port = 5006;
-const browser = await puppeteer.launch({ args: ["--no-sandbox"] });
-const page = await browser.newPage();
+var browser = await puppeteer.launch({ args: ["--no-sandbox"] });
+var page = await browser.newPage();
+var chain = Promise.resolve();
 
 var app = express();
 
@@ -17,12 +18,15 @@ app.get("/pdf", async function (req, res) {
       waitUntil: "networkidle2",
     });
     if (pageResponse.ok()) {
-      await page.emulateMediaType("print");
-      const pdf = await page.pdf({
-        format: "A4",
+      chain = chain.then(async () => { 
+         await page.goto(req.query.url);
+         await page.emulateMediaType("print");
+         const pdf = await page.pdf({
+           format: "A4",
+         });
+         res.writeHead(200, { "Content-Type": "application/pdf" });
+         res.send(pdf);
       });
-      res.writeHead(200, { "Content-Type": "application/pdf" });
-      res.end(pdf);
     } else {
       res
         .status(500)
@@ -32,9 +36,6 @@ app.get("/pdf", async function (req, res) {
     console.log("entering catch block");
     console.log(e);
     console.log("leaving catch block");
-  }
-  finally {
-    await browser.disconnect();
   }
 });
 
