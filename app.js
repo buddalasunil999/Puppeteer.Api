@@ -16,12 +16,13 @@ app.get("/", function (req, res) {
 });
 
 app.get("/pdf", async function (req, res) {
+chain = chain.then(async () => { 
   try {
     const pageResponse = await page.goto(req.query.url, {
       waitUntil: "networkidle2",
     });
     if (pageResponse.ok()) {
-      chain = chain.then(async () => { 
+      
          await page.goto(req.query.url);
          await page.emulateMediaType("print");
          const pdf = await page.pdf({
@@ -29,7 +30,7 @@ app.get("/pdf", async function (req, res) {
          });
          res.writeHead(200, { "Content-Type": "application/pdf" });
          res.send(pdf);
-      });
+     
     } else {
       res
         .status(500)
@@ -40,6 +41,7 @@ app.get("/pdf", async function (req, res) {
     console.log(e);
     console.log("leaving catch block");
   }
+});
 });
 
 app.listen(port, function () {
